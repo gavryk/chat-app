@@ -14,6 +14,9 @@
     text-align: center;
     background-color: white;
     border-radius: 22px;
+    .logo {
+      max-width: 80px;
+    }
     .loginBtn {
       cursor: pointer;
       color: white;
