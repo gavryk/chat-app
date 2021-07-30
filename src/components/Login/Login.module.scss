@@ -1,0 +1,33 @@
+#loginPage {
+  background-image: linear-gradient(#ef3f3f, #040404);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .loginCard {
+    padding: 35px 0 65px;
+    width: 420px;
+    text-align: center;
+    background-color: white;
+    border-radius: 22px;
+    .loginBtn {
+      cursor: pointer;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      display: inline-block;
+      min-width: 250px;
+      margin-bottom: 20px;
+    }
+    .loginBtnGoogle {
+      background-color: #4285f4;
+    }
+    .loginBtnFacebook {
+      background-color: #3b5998;
+    }
+  }
+}
