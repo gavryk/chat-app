@@ -1,43 +1,67 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import { ChatEngine } from "react-chat-engine";
 import { useAuth } from "../../contexts/AuthContext";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 
 const Chats = () => {
-    const { user } = useAuth();
-    const history = useHistory();
-    const [loading, setLoading] = useState(true);
+    const didMountRef = useRef(false)
+    const [ loading, setLoading ] = useState(true)
+    const { user } = useAuth()
+    const history = useHistory()
+
+    async function getFile(url) {
+        let response = await fetch(url);
+        let data = await response.blob();
+        return new File([data], "test.jpg", { type: 'image/jpeg' });
+    }
 
     useEffect(() => {
-        if(!user) {
-            history.push('/')
+        if (!didMountRef.current) {
+            didMountRef.current = true
 
-            return;
+            // Get-or-Create should be in a Firebase Function
+            axios.get(
+                'https://api.chatengine.io/users/me/',
+                { headers: {
+                        "project-id": process.env.REACT_APP_CHAT_ENGINE_ID,
+                        "user-name": user.email,
+                        "user-secret": user.uid
+                    }}
+            )
+
+                .then(() => setLoading(false))
+
+                .catch(e => {
+                    let formdata = new FormData()
+                    formdata.append('email', user.email)
+                    formdata.append('username', user.email)
+                    formdata.append('secret', user.uid)
+
+                    getFile(user.photoURL)
+                        .then(avatar => {
+                            formdata.append('avatar', avatar, avatar.name)
+
+                            axios.post(
+                                'https://api.chatengine.io/users/',
+                                formdata,
+                                { headers: { "private-key": process.env.REACT_APP_CHAT_ENGINE_KEY }}
+                            )
+                                .then(() => setLoading(false))
+                                .catch(e => console.log('e', e.response))
+                        })
+                })
+
         }
-        axios.get('https://api.chatengine.io/users/me', {
-            headers: {
-                'project-id': '7ba5b213-42aa-4654-8f29-d19e96f4096f',
-                'user-name': user.email,
-                'user-secret': user.uid
-            }
-        }).then(() => {
-            setLoading(false);
-        }).catch(() => {
-            let formData = new FormData();
-            formData.append('email', user.email);
-            formData.append('username', user.displayName);
-            formData.append('secret', user.uid);
-        })
     }, [user, history])
 
     return(
        <div>
            <ChatEngine
-               height='calc(100vh - 66px)'
-               projectId='7ba5b213-42aa-4654-8f29-d19e96f4096f'
-               userName='.'
-               userSecret='.'
+               height='calc(100vh - 60px)'
+               projectID={process.env.REACT_APP_CHAT_ENGINE_ID}
+               userName={user.email}
+               userSecret={user.uid}
            />
        </div>
     )
